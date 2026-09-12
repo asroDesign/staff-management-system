@@ -1,0 +1,10 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getSession, checkOrigin } from "@/lib/auth";
+import { ensureTalentSeed } from "@/lib/talent-seed";
+import { getTalentData } from "@/lib/talent-data";
+import { talentAction } from "@/lib/talent-actions";
+import { TalentError } from "@/lib/talent-validation";
+export const dynamic = "force-dynamic";
+function errorResponse(error: unknown) { if (error instanceof TalentError) return NextResponse.json({ error: error.message }, { status: error.status }); const e = error as { code?: string; cause?: { code?: string } }; if ((e.cause?.code || e.code) === "23505") return NextResponse.json({ error: "این رکورد قبلاً ثبت شده است؛ ایمیل، کد پرسنلی یا تخصیص تکراری را بررسی کنید." }, { status: 409 }); console.error("Talent API", { code: e.cause?.code || e.code }); return NextResponse.json({ error: "عملیات انجام نشد. دوباره تلاش کنید." }, { status: 500 }); }
+export async function GET() { try { const user = await getSession(); if (!user) return NextResponse.json({ error: "ورود به حساب لازم است." }, { status: 401 }); await ensureTalentSeed(); return NextResponse.json(await getTalentData(user), { headers: { "Cache-Control": "private, no-store" } }); } catch (e) { return errorResponse(e); } }
+export async function POST(request: NextRequest) { if (!checkOrigin(request)) return NextResponse.json({ error: "مبدأ درخواست معتبر نیست." }, { status: 403 }); try { const user = await getSession(); if (!user) return NextResponse.json({ error: "ورود به حساب لازم است." }, { status: 401 }); if (Number(request.headers.get("content-length")) > 1000000) return NextResponse.json({ error: "حجم درخواست زیاد است." }, { status: 413 }); const body = await request.json(); if (!body || typeof body.action !== "string" || !body.data || typeof body.data !== "object" || Array.isArray(body.data)) return NextResponse.json({ error: "ورودی نامعتبر است." }, { status: 400 }); await ensureTalentSeed(); return NextResponse.json({ ok: true, ...await talentAction(user, body.action, body.data) }); } catch (e) { return errorResponse(e); } }

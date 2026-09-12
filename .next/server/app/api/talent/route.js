@@ -1,0 +1,11 @@
+var R=require("../../../chunks/[turbopack]_runtime.js")("server/app/api/talent/route.js")
+R.c("server/chunks/src_lib_0rlz27h._.js")
+R.c("server/chunks/[root-of-the-server]__0btxr0u._.js")
+R.c("server/chunks/[root-of-the-server]__18pbrd6._.js")
+R.c("server/chunks/node_modules_next_1zc5q0a._.js")
+R.c("server/chunks/[root-of-the-server]__19uz2__._.js")
+R.c("server/chunks/[root-of-the-server]__15bjnu5._.js")
+R.c("server/chunks/[root-of-the-server]__19goq5-._.js")
+R.c("server/chunks/_next-internal_server_app_api_talent_route_actions_022p8_o.js")
+R.m(86162)
+module.exports=R.m(86162).exports
